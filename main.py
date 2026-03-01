@@ -11,7 +11,7 @@ from typing import List, Dict, Any
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-place_id = 97090711812957
+place_id = 81033157158500
 NOWPAYMENTS_WEBHOOK_SECRET = "/adA+ZQs/8aZPVdsW6bNwFl+l+VXEoVJ"
 SessionIdCSRFTokens = {}
 
@@ -245,7 +245,7 @@ def dice(request: Request):
     return CheckIfUserIsLoggedIn(request,"register.html","dice.html")
 
 
-@app.get("/coinflip", response_class=HTMLResponse)
+@app.get("/coinflipfdddeere", response_class=HTMLResponse)
 @limiter.limit("50/minute")
 def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
     if not SessionId:
@@ -393,7 +393,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
             {"request": request, "error": str(error), "X-CSRF-Token": CSRFToken},
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-        
+
 @app.get("/", response_class=HTMLResponse)
 @limiter.limit("50/minute")
 def readroot(request: Request):
@@ -564,7 +564,7 @@ async def withdrawget(request: Request, SessionId: str = Cookie(None)):
 
     return JSONResponse({"redirect": roblox_url})
 
-@app.post("/earnings")
+@app.post("/cashinearnings")
 @limiter.limit("50/minute")
 def depositearnings(request : Request,data: deposit):
 
@@ -648,7 +648,7 @@ def depositearnings(request : Request,data: deposit):
 
         return {"success": True, "type": "withdraw", "amount": amount}
     
-@app.post("/earningsitems")
+@app.post("/cashinearningsitems")
 @limiter.limit("50/minute")
 def depositearnings(request : Request,data: DepositItems):
 
