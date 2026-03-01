@@ -1,0 +1,459 @@
+{% extends "main.html" %}
+
+{% block title %}Coinflip - AH Gambling{% endblock %}
+
+{% block content %}
+<meta name="csrf-token" content="{{ csrf_token }}"></meta>
+
+<style>
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0b0b0b;
+        color: #fff;
+    }
+
+      .coinflip-page {
+        max-width: 1200px;
+        margin: 40px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+
+    .coinflip-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .stats-cards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .stat-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        min-width: 120px;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #22c55e;
+    }
+
+    .stat-title {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-bottom: 6px;
+    }
+
+    .create-btn {
+        padding: 14px 40px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .create-btn:hover { background: #1d4ed8; }
+
+    .coinflip-container {
+        width: 100%;
+        max-height: 900px; 
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 0 8px;
+    }
+
+    .match-card {
+        background: #1e1e2e;
+        border: 1px solid #333;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .players {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+    }
+
+    .player {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .player-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #333;
+        background: #000;
+    }
+
+    .empty-avatar-placeholder {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #000;
+        border: 2px dashed #333;
+    }
+
+    .side-badge {
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        background: #2a2a3d;
+        border: 1px solid #444;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .vs-text { font-weight: 700; font-size: 1.2rem; color: #4b5563; }
+
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.85);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .modal.open { display: flex; }
+
+    .wallet {
+        background: #1c2433;
+        border-radius: 14px;
+        width: 100%;
+        max-width: 480px;
+        padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
+        border: 1px solid #334155;
+    }
+
+    .wallet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .close { cursor: pointer; font-size: 1.5rem; color: #94a3b8; }
+
+    .modal-stat-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.9rem;
+        background: #0f172a;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #333;
+    }
+
+    .modal-search {
+        width: 100%;
+        padding: 12px;
+        background: #0b0b0b;
+        border: 1px solid #333;
+        color: white;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        outline: none;
+    }
+
+      .inventory-grid {
+                display: grid !important; 
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                margin-top: 15px;
+                flex: 1;                
+                overflow-y: auto;       
+                min-height: 300px;     
+                padding: 10px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+            }
+            
+            .inventory-item {
+                background: #111827 !important;
+                border: 1px solid #334155;
+                padding: 10px;
+                min-height: 140px;     
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+    .inventory-item.selected { border-color: #16a34a; background: #064e3b; }
+    .item-val { font-size: 10px; color: #22c55e; font-weight: bold; margin-top: 4px; }
+
+    .coinflip-side-select {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .side-option {
+        flex: 1;
+        padding: 12px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #0b0b0b;
+        border: 1px solid #333;
+        transition: 0.2s;
+    }
+
+    .side-option.selected {
+        background: #16a34a;
+        border-color: #16a34a;
+        font-weight: bold;
+    }
+
+    .match-actions { display: flex; gap: 8px; justify-content: center; }
+    
+    .match-btn {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+
+    .join-btn { background: #16a34a; color: #fff; }
+    .view-btn { background: #334155; color: #fff; }
+
+    .match-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+    .action-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+    .action-btn.deposit { background: #2563eb; color: #fff; }
+    .action-btn.withdraw { background: #374151; color: #fff; }
+
+    .items-preview { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+    .preview-item {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        background: #0b0b0b;
+        border: 1px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .preview-item img { width: 90%; height: 90%; object-fit: contain; }
+
+    @media (max-width: 800px) {
+        .players { gap: 10px; }
+        .player-avatar, .empty-avatar-placeholder { width: 60px; height: 60px; }
+    }
+
+   .coin {
+       width: 100px;
+       height: 100px;
+       border-radius: 50%;
+       background: linear-gradient(to bottom, #ffd700 0%, #daa520 100%);
+       position: relative;
+       transform-style: preserve-3d;
+       transition: transform 3s ease-out;
+       cursor: pointer;
+       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+   }
+   
+   .coin::before, .coin::after {
+       content: '';
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       border-radius: 50%;
+       backface-visibility: hidden;
+   }
+   
+   .coin::before {
+       background: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFTmvlFSBpO5IVkhqyj9YcbCU0U5aix1PpMQ&s') center/cover no-repeat; /* Heads */
+   }
+   
+   .coin::after {
+       background: url('https://s3.amazonaws.com/pix.iemoji.com/images/emoji/apple/ios-18/256/0573.png') center/cover no-repeat;  /* Tails */
+       transform: rotateY(180deg); 
+   }
+      
+      #coinflipOverlay {
+          background: rgba(0,0,0,0.9);
+          display: none; 
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          position: fixed;
+          inset: 0;
+      }
+</style>
+
+<div class="modal" id="createCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Create Coinflip</h2>
+            <span class="close" data-close="createCoinflipModal">&times;</span>
+        </div>
+        <div class="modal-stat-bar">
+            <div>Selected: <strong id="createTotalItems">0</strong></div>
+            <div>Value: <strong id="createTotalValue">$0</strong></div>
+        </div>
+        <div class="coinflip-side-select">
+            <div class="side-option selected" data-side="Heads">🪙 Heads</div>
+            <div class="side-option" data-side="Tails">💰 Tails</div>
+        </div>
+        <input id="createSearch" class="modal-search" placeholder="Search items..." />
+        <div class="inventory-grid" id="createInventory"></div>
+        <div class="match-actions" style="margin-top:20px;">
+            <button class="action-btn withdraw" data-close="createCoinflipModal">Cancel</button>
+            <button class="action-btn deposit" id="coinflipCreateBtn">Create Match</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="joinCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Join Coinflip</h2>
+            <span class="close" data-close="joinCoinflipModal">&times;</span>
+        </div>
+        <div class="modal-stat-bar">
+            <div>Selected: <strong id="joinTotalItems">0</strong></div>
+            <div>Value: <strong id="joinTotalValue">$0</strong></div>
+        </div>
+        <input id="joinSearch" class="modal-search" placeholder="Search items..." />
+        <div class="inventory-grid" id="joinInventory"></div>
+        <div class="match-actions" style="margin-top:20px;">
+            <button class="action-btn withdraw" data-close="joinCoinflipModal">Cancel</button>
+            <button class="action-btn deposit" id="confirmJoinBtn">Confirm Join</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="viewCoinflipModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Match Details</h2>
+            <span class="close" data-close="viewCoinflipModal">&times;</span>
+        </div>
+        <div id="viewCoinflipContent"></div>
+        <div id="viewModalActions" class="match-actions" style="margin-top:24px;"></div>
+    </div>
+</div>
+
+<div id="coinflipOverlay" class="modal" style="display:none; z-index: 10000; flex-direction: column;">
+    <div class="coin" id="coin"></div>
+    <h2 id="winnerAnnouncement" style="margin-top: 20px; color: gold;"></h2>
+</div>
+
+<div class="coinflip-page">
+    <div class="coinflip-controls">
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-title">Active Matches</div>
+                <div class="stat-value">{{ matches|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Value</div>
+                <div class="stat-value">${{ matches|sum(attribute='total_value')|round(2) }}</div>
+            </div>
+        </div>
+        <button class="create-btn" id="createMatchBtn">CREATE MATCH</button>
+    </div>
+
+    <div class="coinflip-container">
+        {% for match in matches %}
+
+        <div class="match-card" 
+            data-id="{{ match.id }}" 
+            data-winner="{{ match.Winner if match.Winner else '' }}"
+            data-side="{{ match.side }}" 
+            data-total-value="{{ match.total_value|round(2) }}"
+            data-is-creator="{{ 'true' if username == match.player1.username else 'false' }}"
+            data-creator-side="{{ match.side if username == match.player1.username else '' }}">
+            <div class="players">
+                <div class="player" data-username="{{ match.player1.username }}">
+                    <div class="side-badge">{{ "🪙" if match.side == "Heads" else "💰" }}</div>
+                    <img class="player-avatar" src="{{ match.player1.avatar }}">
+                    
+                    <div class="player-items-preview">
+                        {% for item in match["items"] %}
+                        <div class="preview-item"><img src="{{ item.image }}"></div>
+                        {% endfor %}
+                    </div>
+                </div>
+            
+                <div class="vs-text">VS</div>
+            
+                <div class="player" data-username="{{ match.player2.username }}">
+                    {% if match.player2.username != "" %}
+                        <div class="side-badge">{{ "💰" if match.side == "Heads" else "🪙" }}</div>
+                        <img class="player-avatar" src="{{ match.player2.avatar }}">
+                        
+                        <div class="player-items-preview">
+                            {% for item in match["items2"] %}
+                            <div class="preview-item"><img src="{{ item.image }}"></div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-avatar-placeholder"></div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="match-actions">
+                {% if username == match.player2.username or username == match.player1.username %}
+                    <button class="match-btn cancel-btn" style="background: #ef4444; color: white;">Cancel</button>
+                {% else %}
+                    <button class="match-btn join-btn" {% if match.player2.username != "" %}disabled{% endif %}>Join</button>
+                {% endif %}
+                <button class="match-btn view-btn">View</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+    <script type="module" src="./javascript/coinflip.js"></script>
+{% endblock %}

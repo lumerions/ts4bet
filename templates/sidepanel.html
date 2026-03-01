@@ -1,0 +1,119 @@
+
+<style>
+    .side-panel {
+        width: 300px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+
+
+    .panel-card {
+        background: linear-gradient(180deg, #1e2140, #15162b);
+        border-radius: 14px;
+        padding: 16px;
+        border: 1px solid #2e2f55;
+    }
+
+    .field {
+        margin-bottom: 3px;
+    }
+
+    .field-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+        color: #c7c9ff;
+    }
+
+    .bet-input {
+            display: flex;
+            align-items: center;
+            background: #2a2d52;
+            border-radius: 10px;
+            padding: 6px 10px; 
+            gap: 6px;
+            margin-top: 10px; 
+        }
+
+    .bet-input input {
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #fff;
+        font-size: 0.95rem;
+        width: 100%;
+        padding: 8px 0 4px 0; 
+    }
+
+
+    .bet-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .bet-actions button {
+        flex: 1;
+        background: #343769;
+        border: none;
+        border-radius: 8px;
+        padding: 6px;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    .bet-actions button:hover {
+        background: #4a4ee8;
+    }
+
+   
+    .input2 {
+            width: 100%;
+            padding: 12px;
+            background: #2a3448;
+            border: 2px solid #7c3aed;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 14px;
+            position: relative;
+            top: 4px;
+            -moz-appearance: textfield;
+    }
+
+    .input2::-webkit-inner-spin-button,
+    .input2::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+
+</style>
+<div class="side-panel">
+    <div class="panel-card">
+        <div class="field">
+            <div class="field-header">
+                <span>Bet Amount</span>
+                <span>Tokens</span>
+            </div>
+            <div class="bet-input">
+                <span>$</span>
+                <input type="number" id="betAmount" value="10" min="1" class="input2">
+            </div>
+            <div class="bet-actions">
+                <button onclick="adjustBet(0.5)">½</button>
+                <button onclick="adjustBet(2)">2×</button>
+                <button onclick="setMaxBet()">MAX</button>
+            </div>
+        </div>
+        <div class="field" style="margin-top: 20px;">
+            <label style="font-size:0.8rem; color:#9ca3af;">Mines per Row</label>
+            <div class="bet-input">
+                <span>💣</span>
+                <input type="number" id="mineCount" value="1" min="1" max="2">
+            </div>
+        </div>
+    </div>
+</div>

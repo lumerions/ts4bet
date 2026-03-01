@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+     <title>{% block title %}Home - AH Gambling{% endblock %}</title>  
+
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+                'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header { 
+            border-bottom: 1px solid #333333; 
+            background: #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            width: 100%;
+            padding: 1rem 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 0; 
+        }
+
+        .balance-wrapper {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .balance-btn {
+            background-color: #111111;
+            border: 1px solid #333333;
+            color: #ffffff;
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .balance-btn:hover {
+            background-color: #222222;
+            border-color: #555555;
+        }
+
+        .balance-menu {
+            position: absolute;
+            right: 0;
+            top: 120%;
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            min-width: 160px;
+            padding: 0.5rem 0;
+            display: none;
+            z-index: 100;
+        }
+
+        .balance-menu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .balance-menu a:hover {
+            background-color: #222222;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #333333;
+            margin: 0.4rem 0;
+        }
+
+        .balance-wrapper.open .balance-menu {
+            display: block;
+        }
+
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: #0b0b0b;
+            border-right: 1px solid #333333;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: sticky;
+            top: 61px;
+            height: calc(100vh - 61px);
+        }
+
+        .sidebar-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+            margin: 1.5rem 0 0.5rem 0.75rem;
+        }
+
+        .sidebar-label:first-child { 
+            margin-top: 0; 
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: #9ca3af;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .sidebar-link.active {
+            background: #7c3aed;
+            color: #ffffff;
+            font-weight: 500;
+        }
+        
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 3rem 1rem;
+            width: 100%; 
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal.open { display: flex; }
+
+        .close { 
+            cursor: pointer; 
+            font-size: 1.5rem; 
+            color: #9ca3af; 
+        }
+
+        .tabs { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 20px; 
+        }
+
+        .tab {
+            flex: 1; 
+            padding: 10px; 
+            border-radius: 8px; 
+            border: none;
+            cursor: pointer; 
+            background: #2a3448; 
+            color: #cbd5f5; 
+            font-weight: 500;
+        }
+
+        .tab.active.deposit { background: #16a34a; color:#fff; }
+        .tab.active.withdraw { background: #2563eb; color:#fff; }
+
+        label { 
+            display: block; 
+            font-size: .85rem; 
+            margin-bottom: 8px; 
+            color: #cbd5f5; 
+        }
+
+        input {
+            width: 100%; 
+            padding: 12px; 
+            background: #2a3448;
+            border: 2px solid #334155; 
+            border-radius: 8px;
+            color: #fff; 
+            margin-bottom: 16px; 
+            outline: none;
+        }
+
+        input:focus { border-color: #7c3aed; }
+
+        .instructions {
+            background: rgba(0,0,0,0.2); 
+            padding: 12px;
+            border-radius: 8px; 
+            font-size: .85rem;
+            color: #94a3b8; 
+            margin-bottom: 20px; 
+            line-height: 1.4;
+        }
+
+        .action-btn {
+            width: 100%; 
+            padding: 14px; 
+            border-radius: 10px;
+            border: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 1rem;
+        }
+
+        .action-btn.small {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+        }
+
+        .action-btn.deposit { background: #16a34a; color: #fff; }
+        .action-btn.withdraw { background: #2563eb; color: #fff; }
+
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            color: #f87171; 
+            padding: 12px; 
+            border-radius: 8px;
+            font-size: 0.85rem; 
+            margin-bottom: 16px;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .app-container { flex-direction: column; }
+            .sidebar {
+                width: 100%; 
+                height: auto; 
+                position: static;
+                flex-direction: row; 
+                overflow-x: auto; 
+                padding: 0.75rem;
+                border-right: none; 
+                border-bottom: 1px solid #333;
+            }
+            .sidebar-label { display: none; }
+            .sidebar-link { white-space: nowrap; padding: 0.5rem 1rem; }
+            main { padding: 2rem 1rem; }
+            nav { justify-content: center; padding: 1rem; }
+            .logo { margin-left: 0 !important; font-size: 1.1rem; }
+            .balance-wrapper { margin-left: auto; }
+        }
+
+            .wallet {
+                background: #1c2433;
+                border-radius: 14px;
+                width: 95%;          
+                max-width: 500px;     
+                padding: 24px;
+                display: flex;         
+                flex-direction: column; 
+                max-height: 90vh;     
+            }
+
+        
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+            
+            .inventory-grid {
+                display: grid !important; 
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+                margin-top: 15px;
+                flex: 1;                
+                overflow-y: auto;       
+                min-height: 300px;     
+                padding: 10px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+            }
+            
+            .inventory-item {
+                background: #111827 !important;
+                border: 1px solid #334155;
+                padding: 10px;
+                min-height: 140px;     
+                display: flex !important;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+        .inventory-item img {
+            width: 60px; 
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+        
+        .inventory-item .name {
+            font-weight: 600;
+            font-size: 0.75rem; 
+            margin-bottom: 2px;
+        }
+
+        .inventory-item .serial {
+            color: #94a3b8;
+            font-size: 0.6rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item .name {
+            font-weight: 500;
+            font-size: 0.7rem;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item .value {
+            color: #16a34a;
+            font-weight: 600;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .inventory-item.selected {
+            outline: none;
+            border: 2px solid #16a34a !important;
+            box-sizing: border-box; 
+        }
+
+        .inventory-item .select-box {
+            width: 100%;
+            height: 4px;
+            margin-bottom: 4px;
+        }
+
+
+    </style>
+</head>
+
+<body>
+<header>
+   <nav>
+    <a href="/" class="logo">AH Gambling</a>
+
+    <div class="balance-wrapper">
+        <button class="balance-btn"></button>
+        <div class="balance-menu">
+            <a id="openDeposit">Deposit</a>
+            <a id="openWithdraw">Withdraw</a>
+            <a id="Inventory">Inventory</a>
+            <div class="divider"></div>
+            <a href="/logout">Log out</a>
+        </div>
+    </div>
+</nav>
+</header>
+
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-label">Navigation</div>
+        <a href="/" class="sidebar-link">Home</a>
+        <div class="sidebar-label">Games</div>
+        <a href="/towers" class="sidebar-link">Towers</a>
+        <a href="/mines" class="sidebar-link">Mines</a>
+        <a href="/dice" class="sidebar-link">Dice</a>
+        <a href="/coinflip" class="sidebar-link">Coinflip</a>
+    </aside>
+        <main>
+         {% block content %}{% endblock %} 
+    </main>
+</div>
+
+<div class="modal" id="inventoryActionModal">
+    <div class="wallet">
+
+        <div class="wallet-header">
+            <h2 id="inventoryActionTitle">Inventory</h2>
+            <span class="close" id="closeInventoryAction">&times;</span>
+        </div>
+
+        <div class="instructions" id="inventoryInstructions">
+            1. Click initiate<br>
+            2. Join the game via the link<br>
+            3. Complete transaction in-game
+        </div>
+
+        <button class="action-btn deposit" id="inventoryActionBtn">
+            Confirm
+        </button>
+
+    </div>
+</div>
+
+<div class="modal" id="walletModal">
+    <div class="wallet">
+        <div class="wallet-header">
+            <h2>Wallet</h2>
+            <span class="close">&times;</span>
+        </div>
+
+        <div class="tabs">
+            <button class="tab deposit active">Deposit</button>
+            <button class="tab withdraw">Withdraw</button>
+        </div>
+
+        {% if wallet_error %}
+            <p class="error-message">
+                <strong>Error:</strong> {{ wallet_error }}
+            </p>
+        {% endif %}
+
+        <label>Amount</label>
+        <input type="text" id="amount" placeholder="Enter amount">
+        <div class="instructions" id="instructions"></div>
+
+        <button class="action-btn deposit" id="depositBtn">Initiate Deposit</button>
+        <button class="action-btn withdraw" id="withdrawBtn" style="display:none;">Initiate Withdrawal</button>
+    </div>
+</div>
+
+<div class="modal" id="inventoryModal">
+<div class="wallet">
+    <div class="wallet-header">
+        <h2>Inventory</h2>
+        <span class="close">&times;</span>
+    </div>
+
+    <input id="inventorySearch" placeholder="Search items...">
+
+    <div id="totalValue" style="display:flex; justify-content:space-between; margin-top:10px;">
+        <div>Total Value: <strong>$250</strong></div>
+        <button class="action-btn deposit small" id="InventoryDepositBtn">Deposit</button>
+    </div>
+
+    <div class="inventory-grid"></div>
+
+    <div style="text-align:right; margin-top:12px;">
+        <button class="action-btn withdraw" id="InventoryWithdrawBtn">Withdraw</button>
+    </div>
+</div>
+</div>
+    <script type="module" src="./javascript/main.js"></script>
+</body>
+</html>

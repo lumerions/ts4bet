@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AH Gambling{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=2">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        header { border-bottom: 1px solid #333333; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; }
+        .logo { color: #ffffff; text-decoration: none; font-size: 1.25rem; font-weight: 600; }
+        main { flex: 1; display: flex; justify-content: center; align-items: center; padding: 2rem; }
+        .card {
+            background-color: #111111;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        .card h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .card p { color: #888888; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        label { font-size: 0.8rem; color: #aaaaaa; display: block; margin-bottom: 0.25rem; }
+        input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            margin-bottom: 1rem;
+            background-color: #0a0a0a;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        input:focus { outline: none; border-color: #555555; }
+        button {
+            width: 100%;
+            padding: 0.6rem;
+            background-color: #222222;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button:hover { background-color: #333333; border-color: #555555; }
+        .footer-text { margin-top: 1rem; text-align: center; font-size: 0.8rem; color: #888888; }
+        .footer-text a { color: #ffffff; text-decoration: none; }
+        .footer-text a:hover { text-decoration: underline; }
+        .error-message {color: #ff5555 !important;font-weight: bold;}
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">AH Gambling</a>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>
+
