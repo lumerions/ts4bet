@@ -1185,11 +1185,12 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
 
         if username.get("error"):
             return username
-
+        
         RedisBalance = redis.get(SessionId)
 
         if not RedisBalance:
             return JSONResponse({"error": "Insufficient Funds."})
+        
         try:
             betamount = int(betamount)
             RedisBalance = int(RedisBalance)
@@ -1205,6 +1206,7 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
             return JSONResponse({"error": "Invalid Target Number."})
         if not redis.set("Dice" + SessionId, 1,nx=True,px=250):
             return JSONResponse({"error": "Error playing dice."})
+        
 
         newDocument = mainCollection.find_one_and_update(
             {"username": username["username"]},
@@ -1212,21 +1214,30 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
             return_document=ReturnDocument.AFTER,
         )
 
+        if not newDocument:
+            return JSONResponse({"error": "Insufficient Funds."})
+
         newBalance = int(newDocument["balance"])
         redis.set(SessionId,newBalance,ex = 2628000)
+
         randomInt = random.randint(0,100)
 
         if prediction == "under":
             Won = randomInt < targetNumber
-            WinChance = (targetNumber - 1) / 100
+            WinCount = targetNumber
         else:
             Won = randomInt > targetNumber
-            WinChance = (100 - targetNumber) / 100
+            WinCount = 100 - targetNumber
 
-        multiplier = 0.98 / max(WinChance, 0.0001)
+        WinChance = WinCount / 101
+
+        if WinChance > 0:
+            multiplier = 0.98 / WinChance
+        else:
+            multiplier = 0
 
         if Won:
-            Payout = betamount * multiplier
+            Payout = int(math.floor(betamount * multiplier))
             newDocument = mainCollection.find_one_and_update(
                 {"username": username["username"]},
                 {"$inc": {"balance": Payout}},
