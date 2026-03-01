@@ -1279,12 +1279,11 @@ async def gamestart(request : Request,SessionId: str = Cookie(None)):
             return returnTemplate("Bet amount or mine count is none!",request,htmlErrorType,htmlFile,status.HTTP_400_BAD_REQUEST)
         
         try:
-            floattotalmines = float(mine_count)
-            floatbetamount = float(bet_amount)
-            if not floatbetamount.is_integer() or not floattotalmines.is_integer():
-                raise ValueError
-            mine_count = int(floattotalmines)
-            bet_amount = int(floatbetamount)
+            if isinstance(bet_amount, float) or isinstance(mine_count, float):
+                raise ValueError("No decimals allowed")
+            
+            mine_count = int(mine_count)
+            bet_amount = int(bet_amount)
         except (TypeError, ValueError):
             return returnTemplate("Request body must be whole numbers.", request, htmlErrorType, htmlFile,status.HTTP_400_BAD_REQUEST)
 
