@@ -1143,7 +1143,7 @@ def gameclick(request: Request,data: MinesClick, SessionId: str = Cookie(None)):
         if Game == "Towers":
             mine_multiplier = ((len(mines) / 23) ** 1.5) + 0.1
             payout = bet_amount * (row + 1) * mine_multiplier * 0.3
-            payout = math.floor(payout)
+            payout = math.floor(payout * 0.98)
             payoutset = int(CashoutAvailable) + int(payout)
             rowset = currentRow + 1
             redis.mset({
@@ -1157,6 +1157,7 @@ def gameclick(request: Request,data: MinesClick, SessionId: str = Cookie(None)):
             multiplier_per_click = total_tiles / (total_tiles - len(mines))
             total_multiplier = multiplier_per_click ** tilescleared
             winnings = int(bet_amount * total_multiplier)
+            winnings = math.floor(winnings * 0.98)
             redis.mset({
                 SessionId + "Cashout": str(winnings),
                 "ClickData." + SessionId: json.dumps(existing_array),
@@ -1204,8 +1205,12 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
             return JSONResponse({"error": "Invalid Prediction."})
         if int(targetNumber) < 2 or int(targetNumber) > 99:
             return JSONResponse({"error": "Invalid Target Number."})
-        if not redis.set("Dice" + SessionId, 1,nx=True,px=250):
-            return JSONResponse({"error": "Error playing dice."})
+        lock_key = f"DiceLock:{SessionId}"
+        
+        lock_acquired = redis.set(lock_key, 1, nx=True, px=500)  
+
+        if not lock_acquired:
+            return JSONResponse({"error": "Please wait a moment before trying again."})
         
         newDocument = mainCollection.find_one_and_update(
             {
@@ -1218,9 +1223,10 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
 
         if not newDocument:
             return JSONResponse({"error": "Insufficient Funds."})
-
+        
+        RedisPipeline = redis.pipeline()
         newBalance = int(newDocument["balance"])
-        redis.set(SessionId,newBalance,ex = 2628000)
+        RedisPipeline.set(SessionId,newBalance,ex = 2628000)
 
         randomInt = random.randint(0,100)
 
@@ -1247,11 +1253,13 @@ async def dicePlay(request : Request,SessionId : str = Cookie(None)):
             )
 
         if not newDocument:
+            RedisPipeline.exec()
             return JSONResponse({"error": "User not found."})
             
         newBalance = int(newDocument["balance"])
-        redis.set(SessionId,newBalance,ex = 2628000)
-
+        RedisPipeline.set(SessionId,newBalance,ex = 2628000)
+        RedisPipeline.delete(lock_key)
+        RedisPipeline.exec()
         return JSONResponse({"win": Won,"roll":randomInt})
 
     except Exception as e:
