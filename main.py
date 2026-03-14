@@ -1171,7 +1171,6 @@ def gameclick(request: Request,data: MinesClick, SessionId: str = Cookie(None)):
         traceback.print_exc()
         return JSONResponse({"error": "Error with click."}, status_code=400)
 
-
 @app.post("/games/dice/play")
 @limiter.limit("50/minute")
 async def dicePlay(request : Request,SessionId : str = Cookie(None)):
