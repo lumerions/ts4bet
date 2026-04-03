@@ -11,8 +11,8 @@ from typing import List, Dict, Any
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-place_id = 81033157158500
-NOWPAYMENTS_WEBHOOK_SECRET = "/adA+ZQs/8aZPVdsW6bNwFl+l+VXEoVJ"
+place_id = 1
+NOWPAYMENTS_WEBHOOK_SECRET = ""
 SessionIdCSRFTokens = {}
 
 app = FastAPI(
@@ -331,7 +331,7 @@ def GetActiveCoinflips(request : Request,SessionId: str = Cookie(None)):
                 print(str(e))
                 return JSONResponse({"error": str(e)}, status_code=400)
 
-        response = requests.get("https://express-js-on-vercel-blue-sigma.vercel.app/GetItem")
+        response = requests.get("url here")
         MarketplaceData = response.json()
         ItemData = MarketplaceData["data"]
         CSRFToken = getCSRFTokens(SessionId)
@@ -697,7 +697,7 @@ def depositearnings(request : Request,data: DepositItems):
     collection = database["Items"]
 
     if data.Deposit:
-        getInventoryUrl =  "https://express-js-on-vercel-blue-sigma.vercel.app/GetInventory?id=" + str(data.userid)
+        getInventoryUrl =  "domain here" + str(data.userid)
         Response = requests.get(getInventoryUrl)
         decodedResponse = Response.json()
         DataGet = decodedResponse.get("data")
